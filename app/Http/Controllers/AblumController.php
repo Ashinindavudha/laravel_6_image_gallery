@@ -71,9 +71,10 @@ class AblumController extends Controller
      * @param  \App\Ablum  $ablum
      * @return \Illuminate\Http\Response
      */
-    public function show(Ablum $ablum)
+    public function show($id)
     {
-        //
+        $album = Ablum::with('photos')->find($id);
+        return view('albums.show')->with('album', $album);
     }
 
     /**

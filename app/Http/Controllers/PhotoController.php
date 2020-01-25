@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Photo;
+use App\Ablum;
 use Illuminate\Http\Request;
 
 class PhotoController extends Controller
@@ -24,7 +25,8 @@ class PhotoController extends Controller
      */
     public function create()
     {
-        //
+     $ablum_id ='';
+     return view('photo.create')->with('ablum_id', $ablum_id);   
     }
 
     /**
@@ -35,7 +37,33 @@ class PhotoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->validate($request, [
+            'title' => 'required',
+            'photo' => 'image|max:1999'
+        ]);
+        //GET FILENAME WITH EXTENSTION
+        $filenameWithExt = $request->file('photo')->getClientOriginalName();
+        //get just the filename 
+        $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+        //get extension 
+        $extension = $request->file('photo')->getClientOriginalExtension();
+        //return $extension;
+        //create new filename
+        $filenameToStore = $filename. '_'.time().'.'.$extension;
+        //return $filenameToStore;
+        //upload image
+        $path = $request->file('photo')->storeAs('public/photo/'.$request->input('ablum_id'), $filenameToStore);
+        //return $path;
+        //create Upload Photo
+        $photo = new Photo;
+        $photo->ablum_id = $request->input('ablum_id');
+        $photo->title = $request->input('title');
+        $photo->description = $request->input('description');
+        $photo->size = $request->file('photo')->getClientSize();
+        $photo->photo = $filenameToStore;
+        $photo->save();
+        //return redirect(route('albums/'.$request->input('ablum_id')))->with('success', 'Photo Uploaded');
+        return back();
     }
 
     /**
